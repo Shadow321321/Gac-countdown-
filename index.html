@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -177,12 +176,13 @@
         </div>
 
         <div class="release-info">
-            <p>Countdown to 7:00 PM in your local timezone</p>
+            <p><strong>Release Time: 7:00 PM Poland Time</strong></p>
             <p id="timezone-info"></p>
         </div>
     </div>
 
     <script>
+        // Create floating particles
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
             const particleCount = 50;
@@ -203,18 +203,38 @@
             }
         }
 
+        // Countdown logic
         function updateCountdown() {
             const now = new Date();
+            
+            // Create 7 PM today in Poland timezone
             const today = new Date();
-            today.setHours(19, 0, 0, 0);
-
-            if (now > today) {
-                today.setDate(today.getDate() + 1);
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const date = today.getDate();
+            
+            // Create the target time: 7 PM Poland time
+            // We'll create it as if it's 7 PM UTC, then adjust for Poland timezone
+            const targetUTC = new Date(Date.UTC(year, month, date, 19, 0, 0)); // 7 PM UTC
+            
+            // Poland is UTC+1 (UTC+2 during DST)
+            // Get current Poland time to determine offset
+            const polandNow = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
+            const utcNow = new Date(now.toLocaleString("en-US", {timeZone: "UTC"}));
+            const polandOffsetHours = (polandNow.getTime() - utcNow.getTime()) / (1000 * 60 * 60);
+            
+            // Adjust target time for Poland timezone (subtract offset to get correct UTC time)
+            const targetPolandTime = new Date(targetUTC.getTime() - (polandOffsetHours * 60 * 60 * 1000));
+            
+            // If target time has passed today, set for tomorrow
+            if (now > targetPolandTime) {
+                targetPolandTime.setDate(targetPolandTime.getDate() + 1);
             }
 
-            const timeDiff = today - now;
+            const timeDiff = targetPolandTime - now;
 
             if (timeDiff <= 0) {
+                // Release time has arrived!
                 document.getElementById('countdown').innerHTML = 
                     '<div class="released">🎉 GROW A CAVE IS NOW RELEASED! 🎉</div>';
                 return;
@@ -229,19 +249,63 @@
             document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
         }
 
+        // Display timezone info
         function showTimezoneInfo() {
-            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-            document.getElementById('timezone-info').textContent = 
-                `Your timezone: ${timezone} | Current time: ${timeString}`;
+            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
+            // Create today's date and set to 7 PM in Poland timezone
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const date = today.getDate();
+            
+            // Create 7 PM today in Poland timezone using a more reliable method
+            const polandTime = new Date();
+            polandTime.setFullYear(year, month, date);
+            polandTime.setHours(19, 0, 0, 0);
+            
+            // Convert this time to what it would be in the user's timezone
+            // by creating the same moment in time but displaying in user's timezone
+            const polandTimeString = polandTime.toLocaleString("en-US", {timeZone: "Europe/Warsaw"});
+            const polandMoment = new Date(polandTimeString);
+            polandMoment.setHours(19, 0, 0, 0);
+            
+            // Now convert this moment to user's timezone
+            const userLocalMoment = new Date(polandMoment.toLocaleString("en-US", {timeZone: userTimezone}));
+            
+            // Get the time difference between Poland and user timezone
+            const nowInPoland = new Date(today.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
+            const nowInUserTZ = new Date(today.toLocaleString("en-US", {timeZone: userTimezone}));
+            const timeDifferenceMs = nowInUserTZ.getTime() - nowInPoland.getTime();
+            
+            // Apply this difference to 7 PM Poland time
+            const userEquivalentTime = new Date(polandMoment.getTime() + timeDifferenceMs);
+            
+            // Format the time in 12-hour format
+            const timeOptions = {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            };
+            
+            const localTimeDisplay = userEquivalentTime.toLocaleTimeString('en-US', timeOptions);
+            
+            document.getElementById('timezone-info').innerHTML = 
+                That's ${localTimeDisplay} for you;
         }
 
+        // Initialize
         createParticles();
         showTimezoneInfo();
         updateCountdown();
+        
+        // Update countdown every second
         setInterval(updateCountdown, 1000);
+        
+        // Update timezone info every minute
         setInterval(showTimezoneInfo, 60000);
     </script>
 </body>
 </html>
+
+
