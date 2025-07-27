@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Grow a Cave Release Countdown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cave-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 70%);
+            z-index: 1;
+        }
+
+        .content {
+            z-index: 2;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .title {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #64ffda, #00bcd4, #4fc3f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .time-unit {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            min-width: 120px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .time-unit:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(100, 255, 218, 0.2);
+        }
+
+        .time-number {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: bold;
+            color: #64ffda;
+            text-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .time-label {
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .release-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 600px;
+        }
+
+        .cave-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: #64ffda;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(100, 255, 218, 0.5); }
+            to { text-shadow: 0 0 30px rgba(100, 255, 218, 0.8), 0 0 40px rgba(100, 255, 218, 0.3); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .released {
+            color: #4caf50;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            text-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .countdown-container {
+                gap: 1rem;
+            }
+            
+            .time-unit {
+                min-width: 80px;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cave-particles" id="particles"></div>
+    <div class="cave-bg"></div>
+    
+    <div class="content">
+        <h1 class="title">OFFICIAL GROW A CAVE</h1>
+        <h2 class="subtitle">Release Countdown</h2>
+        
+        <div class="countdown-container" id="countdown">
+            <div class="time-unit">
+                <span class="time-number" id="hours">00</span>
+                <span class="time-label">Hours</span>
+            </div>
+            <div class="time-unit">
+                <span class="time-number" id="minutes">00</span>
+                <span class="time-label">Minutes</span>
+            </div>
+            <div class="time-unit">
+                <span class="time-number" id="seconds">00</span>
+                <span class="time-label">Seconds</span>
+            </div>
+        </div>
+
+        <div class="release-info">
+            <p>Countdown to 7:00 PM in your local timezone</p>
+            <p id="timezone-info"></p>
+        </div>
+    </div>
+
+    <script>
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 4 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            const today = new Date();
+            today.setHours(19, 0, 0, 0);
+
+            if (now > today) {
+                today.setDate(today.getDate() + 1);
+            }
+
+            const timeDiff = today - now;
+
+            if (timeDiff <= 0) {
+                document.getElementById('countdown').innerHTML = 
+                    '<div class="released">🎉 GROW A CAVE IS NOW RELEASED! 🎉</div>';
+                return;
+            }
+
+            const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+
+        function showTimezoneInfo() {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('timezone-info').textContent = 
+                `Your timezone: ${timezone} | Current time: ${timeString}`;
+        }
+
+        createParticles();
+        showTimezoneInfo();
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+        setInterval(showTimezoneInfo, 60000);
+    </script>
+</body>
+</html>
